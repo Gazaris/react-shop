@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "ScandiShop",
+  "name": "Front-end part of ScandiShop",
   "icons": [
     {
       "src": "favicon.ico",

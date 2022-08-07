@@ -1,0 +1,22 @@
+.content {
+    width: calc(100% - 202px);
+    padding: 80px 101px;
+    display: flex;
+    flex-direction: column;
+}
+.content h1, h1.content{
+    font-weight: 400;
+    font-size: 42px;
+}
+#products {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+#products .product {
+    width: 386px;
+    height: 444px;
+    display: flex;
+    flex-direction: column;
+    border: solid 1px black;
+}

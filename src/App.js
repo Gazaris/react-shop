@@ -1,25 +1,26 @@
-import logo from './logo.svg';
 import './App.css';
+import { PureComponent } from 'react';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import ProductsList from './components/ProductsList';
+import Header from './components/Header';
+import { client } from '@tilework/opus';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+export default class App extends PureComponent {
+  constructor(props) {
+    super(props);
+    client.setEndpoint(process.env.REACT_APP_GRAPHQL_ENDPOINT);
+  }
+  render() {
+    return (
+      <div className="App">
+        <Header />
+        <Switch>
+          <Route path="/:category" component={(props) => <ProductsList {...props} key={window.location.pathname} />} />
+          <Route path="/">
+            <Redirect to="/all" />
+          </Route>
+        </Switch>
+      </div>
+    );
+  }
 }
-
-export default App;
