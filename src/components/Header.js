@@ -6,17 +6,37 @@ import EmptyCart from '../svg/EmptyCart';
 import Drop from '../svg/Drop';
 
 export default class Header extends PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      category: "none"
+    };
+    this.state.category = window.location.pathname.split('/')[1];
+  }
   render() {
+    let { category } = this.state;
     return (
       <header>
         <div id="navigation">
-          <Link to="/" className="opt noselect chosen">
+          <Link
+            to="/"
+            onClick={() => this.setState({ category: "all" })}
+            className={"opt noselect" + (category === "all" ?" chosen" : "")}
+          >
             <span>ALL</span>
           </Link>
-          <Link to="/tech" className="opt noselect">
+          <Link
+            to="/tech"
+            onClick={() => this.setState({ category: "tech" })}
+            className={"opt noselect" + (category === "tech" ? " chosen" : "")}
+          >
             <span>TECH</span>
           </Link>
-          <Link to="/clothes" className="opt noselect">
+          <Link
+            to="/clothes"
+            onClick={() => this.setState({ category: "clothes" })}
+            className={"opt noselect" + (category === "clothes" ? " chosen" : "")}
+          >
             <span>CLOTHES</span>
           </Link>
         </div>
