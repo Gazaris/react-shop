@@ -3,6 +3,7 @@ import { PureComponent } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import ProductsList from './components/ProductsList';
 import Header from './components/Header';
+import NotFound from './components/NotFound';
 import { client } from '@tilework/opus';
 
 export default class App extends PureComponent {
@@ -15,6 +16,9 @@ export default class App extends PureComponent {
       <div className="App">
         <Header />
         <Switch>
+          <Route path="/404">
+            <NotFound />
+          </Route>
           <Route path="/:category" component={(props) => <ProductsList {...props} key={window.location.pathname} />} />
           <Route path="/">
             <Redirect to="/all" />

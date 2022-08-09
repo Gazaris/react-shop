@@ -12,6 +12,8 @@ export default class Header extends PureComponent {
       category: "none"
     };
     this.state.category = window.location.pathname.split('/')[1];
+    // Fix for redirect from main page
+    if(this.state.category === "") this.state.category = "all";
   }
   render() {
     let { category } = this.state;

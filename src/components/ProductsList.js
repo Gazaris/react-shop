@@ -33,7 +33,12 @@ export default class ProductsList extends PureComponent {
         .addField('name')
       )
     );
-    this.setState({ category: res.category, loading: false });
+    if(res.category !== null)
+      this.setState({ category: res.category, loading: false });
+    else {
+      window.history.replaceState( {} , '', '/404' );
+      window.location.reload();
+    }
   }
   render() {
     const { category, loading, error } = this.state;
