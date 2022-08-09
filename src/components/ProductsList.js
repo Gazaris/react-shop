@@ -62,7 +62,7 @@ export default class ProductsList extends PureComponent {
             {category.products.map((product) => {
               let price = {};
               for(let p of product.prices) {
-                if(p.currency.label == currency) {
+                if(p.currency.label === currency) {
                   price = p;
                   break;
                 }
