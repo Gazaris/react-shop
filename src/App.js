@@ -9,6 +9,9 @@ import { client } from '@tilework/opus';
 export default class App extends PureComponent {
   constructor(props) {
     super(props);
+    this.state = {
+      currency: "USD"
+    }
     client.setEndpoint(process.env.REACT_APP_GRAPHQL_ENDPOINT);
   }
   render() {
@@ -19,7 +22,12 @@ export default class App extends PureComponent {
           <Route path="/404">
             <NotFound />
           </Route>
-          <Route path="/:category" component={(props) => <ProductsList {...props} key={window.location.pathname} />} />
+          <Route
+            path="/:category"
+            component={
+              (props) => <ProductsList currency={this.state.currency} {...props} key={window.location.pathname} />
+            }
+          />
           <Route path="/">
             <Redirect to="/all" />
           </Route>

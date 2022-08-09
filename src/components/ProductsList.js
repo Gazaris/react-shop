@@ -1,12 +1,14 @@
 import { PureComponent } from 'react';
 import '../styles/ProductsList.css';
 import { Query, Field, client } from '@tilework/opus';
+import CircleCartIcon from '../svg/CircleCartIcon';
 
 export default class ProductsList extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       category: this.props.match.params.category,
+      currency: this.props.currency,
       error: false,
       loading: true
     };
@@ -31,6 +33,14 @@ export default class ProductsList extends PureComponent {
       .addField(new Field('products', true)
         .addField('id')
         .addField('name')
+        .addField('gallery')
+        .addField(new Field('prices', false)
+          .addField(new Field('currency')
+            .addField('label')
+            .addField('symbol')
+          )
+          .addField('amount')
+        )
       )
     );
     if(res.category !== null)
@@ -41,7 +51,7 @@ export default class ProductsList extends PureComponent {
     }
   }
   render() {
-    const { category, loading, error } = this.state;
+    const { category, currency, loading, error } = this.state;
     return (
       <div>
         {error && <h1 className="content">Something went wrong...</h1>}
@@ -50,8 +60,20 @@ export default class ProductsList extends PureComponent {
           <h1>{category.name[0].toUpperCase() + category.name.substring(1)}</h1>
           <div id="products">
             {category.products.map((product) => {
+              let price = {};
+              for(let p of product.prices) {
+                if(p.currency.label == currency) {
+                  price = p;
+                  break;
+                }
+              }
               return <div className="product" key={product.id}>
-                <span>{product.name}</span>
+                <img src={product.gallery[0]} alt={product.id} />
+                <div>
+                  <span>{product.name}</span>
+                  <span className='currency'>{price.currency.symbol + price.amount}</span>
+                </div>
+                <CircleCartIcon className={"circle-cart"}/>
               </div>
             })}
           </div>
