@@ -48,6 +48,23 @@
 #products .product:hover {
     box-shadow: 0px 4px 35px rgba(168, 172, 176, 0.19);
 }
-#products .product:hover .circle-cart {
+#products .available:hover .circle-cart {
     opacity: 1;
+}
+#products .out-of-stock {
+    filter: opacity(0.5);
+}
+#products .oos {
+    position: absolute;
+    left: 25.42%;
+    right: 25.71%;
+    top: 44.24%;
+    bottom: 43.94%;
+
+    font-family: 'Raleway';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 160%;
+    color: #8D8F9A;
 }

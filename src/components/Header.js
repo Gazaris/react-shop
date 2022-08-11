@@ -9,44 +9,85 @@ export default class Header extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      category: "none"
+      categories: this.props.categories,
+      category: "none",
+      currencies: this.props.currencies,
+      currency: this.props.currency,
+      setcur: this.props.setcur,
+      clickEventFunc: (e) => {
+        let menu = document.getElementById("curmenu");
+        if (menu.style.display === 'block'){
+          if (!this.isMenu(e.target) && e.target.id !== "currency-switch")
+            this.closeCurMenu(menu);
+        }
+      }
     };
+    this.isMenu = this.isMenu.bind(this);
+    this.closeCurMenu = this.closeCurMenu.bind(this);
+    this.curSwitch = this.curSwitch.bind(this);
     this.state.category = window.location.pathname.split('/')[1];
     // Fix for redirect from main page
     if(this.state.category === "") this.state.category = "all";
   }
+  isMenu(el) {
+    if (el.id === "curmenu" || el.id === "currency-switch") return true;
+    else if (el.tagName === "BODY") return false;
+    else return this.isMenu(el.parentElement);
+  }
+  closeCurMenu(menu) {
+    document.getElementById("drop").style.transform = "scaleY(1)";
+    menu.style.transform = 'translateY(0)';
+    menu.style.opacity = '0';
+    setTimeout(() => {
+      menu.style.display = 'none';
+    }, 300);
+    document.removeEventListener("click", this.state.clickEventFunc);
+  }
+  curSwitch() {
+    let menu = document.getElementById("curmenu");
+    if(menu.style.display === "none") {
+      // Controlling the dropdown icon
+      document.getElementById("drop").style.transform = "scaleY(-1)";
+
+      // Controlling the menu
+      menu.style.display = "block"
+      setTimeout(() => {
+        menu.style.transform = "translateY(10px)";
+        menu.style.opacity = "1";
+      }, 100);
+      document.addEventListener("click", this.state.clickEventFunc);
+    } else this.closeCurMenu(menu);
+  }
   render() {
-    let { category } = this.state;
+    let { categories, category, currencies, setcur } = this.state;
     return (
-      <header>
+      <header >
         <div id="navigation">
-          <Link
-            to="/"
-            onClick={() => this.setState({ category: "all" })}
-            className={"opt noselect" + (category === "all" ?" chosen" : "")}
-          >
-            <span>ALL</span>
-          </Link>
-          <Link
-            to="/tech"
-            onClick={() => this.setState({ category: "tech" })}
-            className={"opt noselect" + (category === "tech" ? " chosen" : "")}
-          >
-            <span>TECH</span>
-          </Link>
-          <Link
-            to="/clothes"
-            onClick={() => this.setState({ category: "clothes" })}
-            className={"opt noselect" + (category === "clothes" ? " chosen" : "")}
-          >
-            <span>CLOTHES</span>
-          </Link>
+          {categories.map((ctgr) => {
+            return <Link
+              key={ctgr}
+              to={"/" + ctgr}
+              onClick={() => this.setState({ category: ctgr })}
+              className={"opt noselect" + (category === ctgr ? " chosen" : "")}
+            >
+              <span>{ctgr.toUpperCase()}</span>
+            </Link>
+          })}
         </div>
         <Logo id="logo"/>
         <div id="actions">
-          <div id="currency">
-            <span className='noselect'>$</span>
+          <div id="currency-switch" onClick={this.curSwitch}>
+            <span className="noselect">{this.props.currency.symbol}</span>
             <Drop id="drop"/>
+          </div>
+          <div id="curmenu" style={{display: "none", opacity: 0}}>
+            {currencies.map((cur) => {
+              return <div
+                className="curopt noselect"
+                onClick={() => setcur({label: cur.label, symbol: cur.symbol})}
+                key={cur.label}
+              >{cur.symbol + " " + cur.label}</div>
+            })}
           </div>
           <EmptyCart />
         </div>

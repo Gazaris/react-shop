@@ -39,8 +39,9 @@ header {
 #actions {
   display: flex;
 }
-#currency {
+#currency-switch {
   display: flex;
+  position: relative;
   align-items: center;
   font-weight: 500;
   font-size: 18px;
@@ -50,10 +51,32 @@ header {
   transition: .3s ease-in-out;
   border: solid 2px #FFFFFF;
 }
-#currency:hover {
+#drop {
+  padding: 0 10px;
+  transition: .3s ease-in-out;
+}
+#currency-switch:hover {
   border-color: #5ECE7B;
   cursor: pointer;
 }
-#drop {
-  padding: 0 10px
+#curmenu {
+  position: absolute;
+  top: 50px;
+  right: 77px;
+  padding: 12px 0;
+  width: 114px;
+  background-color: #FFFFFF;
+  transform: translateY(0);
+  transition: .3s ease-in-out;
+  box-shadow: 0px 4px 35px #acacac4e;
+
+  font-size: 18px;
+  font-weight: 500;
+}
+#curmenu .curopt {
+  padding: 8px 20px;
+  cursor: pointer;
+}
+#curmenu .curopt:hover {
+  background-color: #EEEEEE;
 }

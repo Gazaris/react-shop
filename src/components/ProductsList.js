@@ -9,19 +9,23 @@ export default class ProductsList extends PureComponent {
     this.state = {
       category: this.props.match.params.category,
       currency: this.props.currency,
+      curError: this.props.error,
       error: false,
       loading: true
     };
     this.getProducts = this.getProducts.bind(this);
   }
   componentDidMount() {
-    if(this.state.category) {
-      this.getProducts();
-    } else {
-      this.setState({
-        error: true
-      });
+    if(!this.state.curError) {
+      if(this.state.category) {
+        this.getProducts();
+        return;
+      }
+      return;
     }
+    this.setState({
+      error: true
+    });
   }
   async getProducts() {
     const res = await client.post(
@@ -33,6 +37,7 @@ export default class ProductsList extends PureComponent {
       .addField(new Field('products', true)
         .addField('id')
         .addField('name')
+        .addField('inStock')
         .addField('gallery')
         .addField(new Field('prices', false)
           .addField(new Field('currency')
@@ -60,20 +65,27 @@ export default class ProductsList extends PureComponent {
           <h1>{category.name[0].toUpperCase() + category.name.substring(1)}</h1>
           <div id="products">
             {category.products.map((product) => {
-              let price = {};
+              let price = {
+                currency: {
+                  label: "",
+                  symbol: "-"
+                },
+                price: "0.0"
+              };
               for(let p of product.prices) {
-                if(p.currency.label === currency) {
+                if(p.currency.label === currency.label) {
                   price = p;
                   break;
                 }
               }
-              return <div className="product" key={product.id}>
+              return <div className={"product " + (!product.inStock ? "out-of-stock" : "available")} key={product.id}>
                 <img src={product.gallery[0]} alt={product.id} />
                 <div>
                   <span>{product.name}</span>
-                  <span className='currency'>{price.currency.symbol + price.amount}</span>
+                  <span className='currency'>{price.currency.symbol + (price.amount || "0")}</span>
                 </div>
                 <CircleCartIcon className={"circle-cart"}/>
+                {!product.inStock && <span className="oos noselect">OUT OF STOCK</span>}
               </div>
             })}
           </div>
