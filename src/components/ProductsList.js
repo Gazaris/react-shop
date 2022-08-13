@@ -29,7 +29,7 @@ export default class ProductsList extends PureComponent {
   }
   async getProducts() {
     const res = await client.post(
-      new Query('category', false)
+      new Query('category', true)
       .addArgument('input', 'CategoryInput', {
         title: this.state.category
       })
@@ -46,6 +46,7 @@ export default class ProductsList extends PureComponent {
           )
           .addField('amount')
         )
+        .addField('brand')
       )
     );
     if(res.category !== null)
@@ -78,10 +79,17 @@ export default class ProductsList extends PureComponent {
                   break;
                 }
               }
-              return <div className={"product " + (!product.inStock ? "out-of-stock" : "available")} key={product.id}>
+              return <div
+                onClick={() => {
+                  window.history.pushState( {} , '', '/item/' + product.id );
+                  window.location.reload();
+                }}
+                className={"product " + (!product.inStock ? "out-of-stock" : "available")}
+                key={product.id}
+              >
                 <img src={product.gallery[0]} alt={product.id} />
                 <div>
-                  <span>{product.name}</span>
+                  <span>{product.brand + " " +product.name}</span>
                   <span className='currency'>{price.currency.symbol + (price.amount || "0")}</span>
                 </div>
                 <CircleCartIcon className={"circle-cart"}/>

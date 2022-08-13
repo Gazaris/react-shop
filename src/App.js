@@ -4,6 +4,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import ProductsList from './components/ProductsList';
 import Header from './components/Header';
 import NotFound from './components/NotFound';
+import ProductDisplay from './components/ProductDisplay';
 import { Query, client } from '@tilework/opus';
 
 export default class App extends PureComponent {
@@ -83,6 +84,15 @@ export default class App extends PureComponent {
           <Route path="/404">
             <NotFound />
           </Route>
+          <Route
+            path="/item/:id"
+            component={
+              (props) => <ProductDisplay
+                currency={this.state.currency}
+                {...props}
+                key={window.location.pathname} />
+            }
+          />
           <Route
             path="/:category"
             component={

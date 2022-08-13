@@ -1,0 +1,127 @@
+.content {
+    display: flex;
+    flex-direction: row;
+}
+#small-preview {
+    display: flex;
+    flex-direction: column;
+}
+#small-preview img {
+    object-fit: contain;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 40px;
+    border: solid 1px white;
+    transition: .1s ease-in-out;
+    cursor: pointer;
+}
+#small-preview img:hover, #small-preview.chosen img{
+    border-color: black;
+}
+#big-preview {
+    object-fit: contain;
+    width: 600px;
+    height: 600px;
+    margin-left: 40px;
+    transition: .2s ease-in-out;
+}
+
+#main-info {
+    margin-left: 100px;
+    font-weight: 700;
+    font-size: 24px;
+}
+#main-info h1 {
+    font-size: 30px;
+    font-weight: 400;
+}
+#main-info h1, #main-info p {
+    margin: 0;
+}
+#main-info h1:first-child {
+    font-weight: 600;
+}
+
+.heading {
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
+.attributes {
+    margin-top: 19px;
+}
+.attr {
+    cursor: pointer;
+    margin-top: 24px;
+}
+.items {
+    display: flex;
+    flex-direction: row;
+}
+.item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 6px;
+    border: solid 1px black;
+    transition: 0.15s ease-in-out;
+}
+.item:first-child {
+    margin-left: 0;
+}
+.item.text {
+    min-width: 63px;
+    min-height: 45px;
+    padding: 0 10px;
+}
+.swatch {
+    width: 36px;
+    height: 36px;
+    border-color: white;
+}
+.item.chosen, .item:hover{
+    background-color: black;
+    color: white;
+}
+.swatch.chosen, .swatch:hover{
+    border-color: #5ECE7B;
+}
+
+.price {
+    margin: 24px 0 10px 0;
+}
+.price .amount {
+    margin: 10px 0;
+    line-height: 40px;
+}
+
+.add-to-cart {
+    min-width: 292px;
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    font-size: 16px;
+    padding: 16px 32px;
+    color: white;
+    background-color: #5ECE7B;
+    cursor: pointer;
+    transition: 0.15s ease-in-out;
+}
+.add-to-cart:hover {
+    background-color: #68e489;
+}
+.add-to-cart:active {
+    background-color: #4ca564;
+}
+
+#product-description {
+    margin-top: 40px;
+    font-family: "Roboto", sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+}
+.disabled {
+    background-color: gray;
+    cursor: not-allowed;
+}
