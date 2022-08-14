@@ -12,6 +12,8 @@ export default class ProductDisplay extends PureComponent {
       error: false
     }
     this.getProduct = this.getProduct.bind(this);
+    this.handleAttr = this.handleAttr.bind(this);
+    this.handleSmallPreview = this.handleSmallPreview.bind(this);
   }
   componentDidMount() {
     if(this.state.product) {
@@ -55,8 +57,33 @@ export default class ProductDisplay extends PureComponent {
       window.location.reload();
     }
   }
+  handleAttr(e) {
+    let activated = e.target;
+    while(!activated.classList.contains("item")) {
+      activated = activated.parentElement;
+    }
+    activated.parentElement
+      .getElementsByClassName("chosen")[0]
+      .classList.remove("chosen");
+    activated.classList.add("chosen");
+  }
+  handleSmallPreview(e) {
+    document
+      .getElementById("small-preview")
+      .getElementsByClassName("chosen")[0]
+      .classList.remove("chosen");
+    e.target.classList.add("chosen");
+    let big = document.getElementById("big-preview");
+    big.style.opacity = "0";
+    setTimeout(() => {
+      big.src = e.target.src;
+      big.style.opacity = "1";
+    }, 200);
+  }
   render() {
     let { product, currency, loading, error } = this.state;
+    let c = 0; // Map counter
+    let cl = ""; // Added class
     let price = {
       currency: {
         label: "",
@@ -78,7 +105,15 @@ export default class ProductDisplay extends PureComponent {
       {((!error && !loading) && product) && <div className="content">
         <div id="small-preview">
           {product.gallery.map((pic) => {
-            return <img key={pic} src={pic} alt={product.id} />
+            if(c === 0) cl = "chosen";
+            else cl = "";
+            return <img
+              key={c++}
+              src={pic}
+              alt={product.id}
+              className={cl}
+              onClick={this.handleSmallPreview}
+            />
           })}
         </div>
         <img id="big-preview" src={product.gallery[0]} alt={product.id} />
@@ -87,13 +122,18 @@ export default class ProductDisplay extends PureComponent {
           <h1 className="name">{product.name}</h1>
           <div className="attributes">
             {product.attributes.map((attr) => {
+              c = 0;
               return <div className="attr" key={attr.id}>
                 <p className="heading">{attr.name.toUpperCase()}:</p>
                 <div className="items">
                   {(attr.type === "swatch") && attr.items.map((item) => {
+                    if(c === 0) cl = " chosen";
+                    else cl = "";
+                    c++;
                     return <div
                       key={item.id}
-                      className="item swatch"
+                      className={"item swatch" + cl}
+                      onClick={this.handleAttr}
                     >
                       <div style={{
                         width: "calc(100% - 2px)",
@@ -103,9 +143,13 @@ export default class ProductDisplay extends PureComponent {
                     </div>
                   })}
                   {(attr.type === "text") && attr.items.map((item) => {
+                    if(c === 0) cl = " chosen";
+                    else cl = "";
+                    c++;
                     return <div
                       key={item.id}
-                      className="item text"
+                      className={"item text" + cl}
+                      onClick={this.handleAttr}
                     >
                       <p className="noselect">{item.value}</p>
                     </div>
@@ -118,7 +162,6 @@ export default class ProductDisplay extends PureComponent {
             <p className="heading">PRICE:</p>
             <p className="amount">{price.currency.symbol + price.amount}</p>
           </div>
-          {console.log(product.inStock)}
           <div className={"add-to-cart noselect" + (!product.inStock ? " disabled" : "")}>
             {product.inStock ? "ADD TO CART" : "NOT IN STOCK"}
           </div>
