@@ -10,24 +10,24 @@ export default class Header extends PureComponent {
     super(props);
     this.state = {
       categories: this.props.categories,
-      category: "none",
+      category: window.location.pathname.split('/')[1],
       currencies: this.props.currencies,
       currency: this.props.currency,
-      setcur: this.props.setcur,
-      clickEventFunc: (e) => {
-        let menu = document.getElementById("curmenu");
-        if (menu.style.display === 'block'){
-          if (!this.isMenu(e.target) && e.target.id !== "currency-switch")
-            this.closeCurMenu(menu);
-        }
-      }
+      setcur: this.props.setcur
     };
+    this.clickEventFunc = this.clickEventFunc.bind(this);
     this.isMenu = this.isMenu.bind(this);
     this.closeCurMenu = this.closeCurMenu.bind(this);
     this.curSwitch = this.curSwitch.bind(this);
-    this.state.category = window.location.pathname.split('/')[1];
     // Fix for redirect from main page
     if(this.state.category === "") this.state.category = "all";
+  }
+  clickEventFunc(e) {
+    let menu = document.getElementById("curmenu");
+    if (menu.style.display === 'block'){
+      if (!this.isMenu(e.target) && e.target.id !== "currency-switch")
+        this.closeCurMenu(menu);
+    }
   }
   isMenu(el) {
     if (el.id === "curmenu" || el.id === "currency-switch") return true;
@@ -41,7 +41,7 @@ export default class Header extends PureComponent {
     setTimeout(() => {
       menu.style.display = 'none';
     }, 300);
-    document.removeEventListener("click", this.state.clickEventFunc);
+    document.removeEventListener("click", this.clickEventFunc);
   }
   curSwitch() {
     let menu = document.getElementById("curmenu");
@@ -55,7 +55,7 @@ export default class Header extends PureComponent {
         menu.style.transform = "translateY(10px)";
         menu.style.opacity = "1";
       }, 100);
-      document.addEventListener("click", this.state.clickEventFunc);
+      document.addEventListener("click", this.clickEventFunc);
     } else this.closeCurMenu(menu);
   }
   render() {

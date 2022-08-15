@@ -17,9 +17,15 @@ export default class App extends PureComponent {
       },
       currencies: [],
       categories: [],
+      cart: JSON.parse(localStorage.getItem("cart")),
       error: false
     }
+    if(this.state.cart === null) {
+      this.state.cart = [];
+      localStorage.setItem("cart", JSON.stringify([]));
+    }
     client.setEndpoint(process.env.REACT_APP_GRAPHQL_ENDPOINT);
+    this.setCart = this.setCart.bind(this);
     this.getCurs = this.getCurs.bind(this);
     this.setCurrency = this.setCurrency.bind(this);
   }
@@ -27,6 +33,10 @@ export default class App extends PureComponent {
     this.getCtgrs();
     if(!this.state.error) 
       this.getCurs();
+  }
+  setCart(cartset) {
+    this.setState({ cart: cartset });
+    localStorage.setItem("cart", JSON.stringify(cartset));
   }
   async getCtgrs() {
     const res = await client.post(
@@ -76,10 +86,12 @@ export default class App extends PureComponent {
         <Header
           // Key for updating the component after props change
           key={Math.random()}
+          cart={this.state.cart}
+          setcart={this.setCart}
           categories={this.state.categories}
-          setcur={this.setCurrency}
           currencies={this.state.currencies}
-          currency={this.state.currency} />
+          currency={this.state.currency}
+          setcur={this.setCurrency} />
         <Switch>
           <Route path="/404">
             <NotFound />
@@ -99,6 +111,8 @@ export default class App extends PureComponent {
               (props) => <ProductsList
                 currency={this.state.currency}
                 error={this.state.error}
+                cart={this.state.cart}
+                setcart={this.setCart}
                 {...props}
                 key={window.location.pathname} />
             }

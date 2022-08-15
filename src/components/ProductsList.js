@@ -7,20 +7,21 @@ export default class ProductsList extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
+      cart: this.props.cart,
       category: this.props.match.params.category,
       currency: this.props.currency,
       curError: this.props.error,
       error: false,
       loading: true
     };
+    this.setCart = this.props.setcart.bind(this);
     this.getProducts = this.getProducts.bind(this);
+    this.handleProductClick = this.handleProductClick.bind(this);
+    this.handleAddToCartClick = this.handleAddToCartClick.bind(this);
   }
   componentDidMount() {
     if(!this.state.curError) {
-      if(this.state.category) {
-        this.getProducts();
-        return;
-      }
+      this.getProducts();
       return;
     }
     this.setState({
@@ -36,9 +37,9 @@ export default class ProductsList extends PureComponent {
       .addField('name')
       .addField(new Field('products', true)
         .addField('id')
-        .addField('name')
-        .addField('inStock')
         .addField('gallery')
+        .addField('brand')
+        .addField('name')
         .addField(new Field('prices', false)
           .addField(new Field('currency')
             .addField('label')
@@ -46,7 +47,17 @@ export default class ProductsList extends PureComponent {
           )
           .addField('amount')
         )
-        .addField('brand')
+        .addField(new Field('attributes', true)
+          .addField('id')
+          .addField('name')
+          .addField('type')
+          .addField(new Field('items')
+            .addField('displayValue')
+            .addField('value')
+            .addField('id')
+          )
+        )
+        .addField('inStock')
       )
     );
     if(res.category !== null)
@@ -55,6 +66,71 @@ export default class ProductsList extends PureComponent {
       window.history.replaceState( {} , '', '/404' );
       window.location.reload();
     }
+  }
+  handleProductClick(e, product) {
+    // Checking if clicked on add-cart button or on the product card
+    let clicked = e.target;
+    while(!clicked.classList.contains("circle-cart")) {
+      if(clicked.classList.contains("product")) {
+        window.history.pushState( {} , '', '/item/' + product.id );
+        window.location.reload();
+        return;
+      }
+      clicked = clicked.parentElement;
+    }
+  }
+  handleAddToCartClick(e, product) {
+    // Getting default items for all attributes
+    let chosenAttrs = [];
+    for(let attr of product.attributes) {
+      let at = {
+        id: attr.id,
+        chosenItemId: attr.items[0].id
+      };
+      chosenAttrs.push(at);
+    }
+
+    // Creating new cart item
+    let added = {
+      id: product.id,
+      brand: product.brand,
+      name: product.name,
+      prices: product.prices,
+      attributes: product.attributes,
+      chosenAttributes: chosenAttrs,
+      gallery: product.gallery,
+      quantity: 1
+    };
+    let newCart = this.state.cart;
+
+    // Getting the item from cart if exists
+    let found = this.state.cart.find(e => e.id === added.id);
+    if(found) {
+      let identical = true;
+      for(let attr of found.chosenAttributes) {
+        // Finding the same attribute in the found cart item
+        let fa = found.chosenAttributes.find(e => e.id === attr.id);
+        if(attr.chosenItemId !== fa.chosenItemId) {
+          identical = false;
+          break;
+        }
+      }
+      if(identical) {
+        console.log("found identical")
+        newCart = newCart.map(item => {
+          if(item.id === product.id) {
+            return { ...item, quantity: item.quantity + 1};
+          }
+          return item;
+        });
+        this.setCart(newCart);
+        return;
+      }
+    }
+    // Adding to the cart if item(s) wasn't found
+    // or the attributes didn't match
+    newCart.push(added);
+    this.setCart(newCart);
   }
   render() {
     const { category, currency, loading, error } = this.state;
@@ -80,10 +156,7 @@ export default class ProductsList extends PureComponent {
                 }
               }
               return <div
-                onClick={() => {
-                  window.history.pushState( {} , '', '/item/' + product.id );
-                  window.location.reload();
-                }}
+                onClick={(e) => this.handleProductClick(e, product)}
                 className={"product " + (!product.inStock ? "out-of-stock" : "available")}
                 key={product.id}
               >
@@ -92,7 +165,7 @@ export default class ProductsList extends PureComponent {
                   <span>{product.brand + " " +product.name}</span>
                   <span className='currency'>{price.currency.symbol + (price.amount || "0")}</span>
                 </div>
-                <CircleCartIcon className={"circle-cart"}/>
+                <CircleCartIcon onClick={(e) => this.handleAddToCartClick(e, product)} className={"circle-cart"}/>
                 {!product.inStock && <span className="oos noselect">OUT OF STOCK</span>}
               </div>
             })}
