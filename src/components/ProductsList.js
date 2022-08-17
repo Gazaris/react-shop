@@ -63,7 +63,7 @@ export default class ProductsList extends PureComponent {
     if(res.category !== null)
       this.setState({ category: res.category, loading: false });
     else {
-      window.history.replaceState( {} , '', '/404' );
+      window.location.href('/404');
       window.location.reload();
     }
   }
@@ -79,7 +79,7 @@ export default class ProductsList extends PureComponent {
       clicked = clicked.parentElement;
     }
   }
-  handleAddToCartClick(e, product) {
+  handleAddToCartClick(product) {
     // Getting default items for all attributes
     let chosenAttrs = [];
     for(let attr of product.attributes) {
@@ -101,7 +101,7 @@ export default class ProductsList extends PureComponent {
       gallery: product.gallery,
       quantity: 1
     };
-    let newCart = this.state.cart;
+    let newCart = [ ...this.state.cart ];
 
     // Getting the item from cart if exists
     let found = this.state.cart.find(e => e.id === added.id);
@@ -116,17 +116,16 @@ export default class ProductsList extends PureComponent {
         }
       }
       if(identical) {
-        console.log("found identical")
         newCart = newCart.map(item => {
-          if(item.id === product.id) {
+          if(item.id === product.id)
             return { ...item, quantity: item.quantity + 1};
-          }
           return item;
         });
         this.setCart(newCart);
         return;
       }
     }
+
     // Adding to the cart if item(s) wasn't found
     // or the attributes didn't match
     newCart.push(added);

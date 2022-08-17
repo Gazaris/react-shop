@@ -13,7 +13,7 @@ export default class App extends PureComponent {
     this.state = {
       currency: {
         label: "",
-        symbol: ""
+        symbol: "-"
       },
       currencies: [],
       categories: [],
@@ -62,7 +62,7 @@ export default class App extends PureComponent {
     );
     if(res.currencies !== []) {
       this.setState({ currencies: res.currencies});
-      if(this.state.currency.symbol === "") {
+      if(this.state.currency.symbol === "-") {
         let tempCur = localStorage.getItem("currency");
         if(tempCur !== null) {
           this.setState({ currency: JSON.parse(tempCur) });
@@ -82,7 +82,7 @@ export default class App extends PureComponent {
   }
   render() {
     return (
-      <div className="App">
+      <div id="App">
         <Header
           // Key for updating the component after props change
           key={Math.random()}
@@ -91,7 +91,8 @@ export default class App extends PureComponent {
           categories={this.state.categories}
           currencies={this.state.currencies}
           currency={this.state.currency}
-          setcur={this.setCurrency} />
+          setcur={this.setCurrency}
+        />
         <Switch>
           <Route path="/404">
             <NotFound />
@@ -121,6 +122,7 @@ export default class App extends PureComponent {
             <Redirect to="/all" />
           </Route>
         </Switch>
+        <div id="cart-darkener" style={{display: "none", opacity: 0}} />
       </div>
     );
   }

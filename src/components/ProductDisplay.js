@@ -100,9 +100,9 @@ export default class ProductDisplay extends PureComponent {
       }
     }
     return (<div>
-      {error && <h1 className="content">Something went wrong...</h1>}
-      {(!error && loading) && <h1 className="content">Loading...</h1>}
-      {((!error && !loading) && product) && <div className="content">
+      {error && <h1 className="content item-content">Something went wrong...</h1>}
+      {(!error && loading) && <h1 className="content item-content">Loading...</h1>}
+      {((!error && !loading) && product) && <div className="content item-content">
         <div id="small-preview">
           {product.gallery.map((pic) => {
             if(c === 0) cl = "chosen";
@@ -135,11 +135,7 @@ export default class ProductDisplay extends PureComponent {
                       className={"item swatch" + cl}
                       onClick={this.handleAttr}
                     >
-                      <div style={{
-                        width: "calc(100% - 2px)",
-                        height: "calc(100% - 2px)",
-                        backgroundColor: item.value
-                      }}/>
+                      <div style={{ backgroundColor: item.value }}/>
                     </div>
                   })}
                   {(attr.type === "text") && attr.items.map((item) => {

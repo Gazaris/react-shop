@@ -1,14 +1,16 @@
 import { PureComponent } from 'react';
 import { Link } from 'react-router-dom';
+import Cart from './Cart';
 import "../styles/Header.css";
 import Logo from '../svg/Logo';
-import EmptyCart from '../svg/EmptyCart';
 import Drop from '../svg/Drop';
 
 export default class Header extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
+      cart: this.props.cart,
+      setcart: this.props.setcart,
       categories: this.props.categories,
       category: window.location.pathname.split('/')[1],
       currencies: this.props.currencies,
@@ -24,22 +26,22 @@ export default class Header extends PureComponent {
   }
   clickEventFunc(e) {
     let menu = document.getElementById("curmenu");
-    if (menu.style.display === 'block'){
-      if (!this.isMenu(e.target) && e.target.id !== "currency-switch")
+    if(menu.style.display === "block") {
+      if(!this.isMenu(e.target) && e.target.id !== "currency-switch")
         this.closeCurMenu(menu);
     }
   }
   isMenu(el) {
-    if (el.id === "curmenu" || el.id === "currency-switch") return true;
-    else if (el.tagName === "BODY") return false;
+    if(el.id === "curmenu" || el.id === "currency-switch") return true;
+    else if(el.tagName === "BODY") return false;
     else return this.isMenu(el.parentElement);
   }
   closeCurMenu(menu) {
     document.getElementById("drop").style.transform = "scaleY(1)";
-    menu.style.transform = 'translateY(0)';
-    menu.style.opacity = '0';
+    menu.style.transform = "translateY(0)";
+    menu.style.opacity = "0";
     setTimeout(() => {
-      menu.style.display = 'none';
+      menu.style.display = "none";
     }, 300);
     document.removeEventListener("click", this.clickEventFunc);
   }
@@ -50,11 +52,12 @@ export default class Header extends PureComponent {
       document.getElementById("drop").style.transform = "scaleY(-1)";
 
       // Controlling the menu
-      menu.style.display = "block"
+      menu.style.display = "block";
       setTimeout(() => {
         menu.style.transform = "translateY(10px)";
         menu.style.opacity = "1";
       }, 100);
+
       document.addEventListener("click", this.clickEventFunc);
     } else this.closeCurMenu(menu);
   }
@@ -89,7 +92,12 @@ export default class Header extends PureComponent {
               >{cur.symbol + " " + cur.label}</div>
             })}
           </div>
-          <EmptyCart />
+          <Cart
+            key={Math.random()}
+            currency={this.state.currency}
+            cart={this.state.cart}
+            setcart={this.state.setcart}
+          />
         </div>
       </header>
     )
