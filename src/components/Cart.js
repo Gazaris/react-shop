@@ -113,6 +113,7 @@ export default class Cart extends PureComponent {
   render() {
     let { currency, cartCount, cart } = this.state;
     let totalCost = 0;
+    let ic = -1;
     return (<div id="cart">
       <EmptyCart id="cart-icon" onClick={this.handleCartClick}/>
       {cartCount !== 0 && <div
@@ -139,7 +140,7 @@ export default class Cart extends PureComponent {
             }
             totalCost += chosenPrice.amount * item.quantity;
             totalCost = Math.floor(totalCost * 100) / 100;
-            return <div key={item.id} className="cart-item">
+            return <div key={item.id + (++ic)} className="cart-item">
               <div className="main-info">
                 <span>{item.brand}</span>
                 <span>{item.name}</span>

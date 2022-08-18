@@ -25,8 +25,8 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    bottom: 13px;
-    left: 13px;
+    bottom: 16px;
+    left: 15px;
 }
 #cart-overlay {
     display: flex;

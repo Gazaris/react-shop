@@ -102,6 +102,8 @@ export default class App extends PureComponent {
             component={
               (props) => <ProductDisplay
                 currency={this.state.currency}
+                cart={this.state.cart}
+                setcart={this.setCart}
                 {...props}
                 key={window.location.pathname} />
             }

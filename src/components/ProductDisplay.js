@@ -9,9 +9,13 @@ export default class ProductDisplay extends PureComponent {
       product: this.props.match.params.id,
       currency: this.props.currency,
       loading: true,
-      error: false
+      error: false,
+      chosenAttrs: [],
+      cart: this.props.cart
     }
+    this.setCart = this.props.setcart.bind(this);
     this.getProduct = this.getProduct.bind(this);
+    this.addToCart = this.addToCart.bind(this);
     this.handleAttr = this.handleAttr.bind(this);
     this.handleSmallPreview = this.handleSmallPreview.bind(this);
   }
@@ -50,14 +54,27 @@ export default class ProductDisplay extends PureComponent {
       .addField('inStock')
       .addField('description')
     );
-    if(res.product !== null)
-      this.setState({ product: res.product, loading: false })
+    if(res.product !== null){
+      let defaultAttrs = [];
+      for(let attr of res.product.attributes) {
+        let at = {
+          id: attr.id,
+          chosenItemId: attr.items[0].id
+        };
+        defaultAttrs.push(at);
+      }
+      this.setState({
+        product: res.product,
+        loading: false,
+        chosenAttrs: defaultAttrs
+      });
+    }
     else {
       window.history.replaceState( {} , '', '/404' );
       window.location.reload();
     }
   }
-  handleAttr(e) {
+  handleAttr(e, item, attr) {
     let activated = e.target;
     while(!activated.classList.contains("item")) {
       activated = activated.parentElement;
@@ -66,6 +83,14 @@ export default class ProductDisplay extends PureComponent {
       .getElementsByClassName("chosen")[0]
       .classList.remove("chosen");
     activated.classList.add("chosen");
+
+    let attrIndex = this.state.chosenAttrs.findIndex(i => i.id === attr.id);
+    let newChosenAttrs = [...this.state.chosenAttrs];
+    newChosenAttrs[attrIndex] = {
+      id: attr.id,
+      chosenItemId: item.id
+    };
+    this.setState({ chosenAttrs: newChosenAttrs });
   }
   handleSmallPreview(e) {
     document
@@ -79,6 +104,39 @@ export default class ProductDisplay extends PureComponent {
       big.src = e.target.src;
       big.style.opacity = "1";
     }, 200);
+  }
+  addToCart() {
+    let newCart = [...this.state.cart];
+    let foundItemIndex = newCart.findIndex(e => {
+      let rightOne = true && e.id === this.state.product.id;
+      if(!rightOne) return rightOne;
+      for(let a in this.state.chosenAttrs) {
+        console.log(this.state.chosenAttrs[a], e.chosenAttributes[a]);
+        rightOne &&= (this.state.chosenAttrs[a].chosenItemId === e.chosenAttributes[a].chosenItemId);
+        if(!rightOne) return rightOne;
+      }
+      return rightOne;
+    });
+    console.log(newCart[foundItemIndex]);
+    if(foundItemIndex === -1) {
+      let newItem = {
+        id: this.state.product.id,
+        brand: this.state.product.brand,
+        name: this.state.product.name,
+        prices: this.state.product.prices,
+        attributes: this.state.product.attributes,
+        chosenAttributes: this.state.chosenAttrs,
+        gallery: this.state.product.gallery,
+        quantity: 1
+      };
+      newCart.push(newItem);
+      this.setCart(newCart);
+      console.log(newCart);
+    } else {
+      newCart[foundItemIndex].quantity += 1;
+      this.setCart(newCart);
+      console.log(newCart);
+    }
   }
   render() {
     let { product, currency, loading, error } = this.state;
@@ -133,7 +191,7 @@ export default class ProductDisplay extends PureComponent {
                     return <div
                       key={item.id}
                       className={"item swatch" + cl}
-                      onClick={this.handleAttr}
+                      onClick={(e) => this.handleAttr(e, item, attr)}
                     >
                       <div style={{ backgroundColor: item.value }}/>
                     </div>
@@ -145,7 +203,7 @@ export default class ProductDisplay extends PureComponent {
                     return <div
                       key={item.id}
                       className={"item text" + cl}
-                      onClick={this.handleAttr}
+                      onClick={(e) => this.handleAttr(e, item, attr)}
                     >
                       <p className="noselect">{item.value}</p>
                     </div>
@@ -158,9 +216,19 @@ export default class ProductDisplay extends PureComponent {
             <p className="heading">PRICE:</p>
             <p className="amount">{price.currency.symbol + price.amount}</p>
           </div>
-          <div className={"add-to-cart noselect" + (!product.inStock ? " disabled" : "")}>
-            {product.inStock ? "ADD TO CART" : "NOT IN STOCK"}
-          </div>
+          {product.inStock && 
+            <div
+              className="add-to-cart noselect"
+              onClick={this.addToCart}
+            >
+              ADD TO CART
+            </div>
+          }
+          {!product.inStock && 
+            <div className="add-to-cart noselect disabled">
+              NOT IN STOCK
+            </div>
+          }
           <div id="product-description" dangerouslySetInnerHTML={{__html: product.description}}/>
         </div>
       </div>}
