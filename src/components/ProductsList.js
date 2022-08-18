@@ -90,46 +90,37 @@ export default class ProductsList extends PureComponent {
       chosenAttrs.push(at);
     }
 
-    // Creating new cart item
-    let added = {
-      id: product.id,
-      brand: product.brand,
-      name: product.name,
-      prices: product.prices,
-      attributes: product.attributes,
-      chosenAttributes: chosenAttrs,
-      gallery: product.gallery,
-      quantity: 1
-    };
+    // Creating new cart
     let newCart = [ ...this.state.cart ];
 
-    // Getting the item from cart if exists
-    let found = this.state.cart.find(e => e.id === added.id);
-    if(found) {
-      let identical = true;
-      for(let attr of found.chosenAttributes) {
-        // Finding the same attribute in the found cart item
-        let fa = found.chosenAttributes.find(e => e.id === attr.id);
-        if(attr.chosenItemId !== fa.chosenItemId) {
-          identical = false;
-          break;
-        }
+    // Searching for the identical item in cart
+    let foundItemIndex = newCart.findIndex(e => {
+      let rightOne = true && e.id === product.id;
+      if(!rightOne) return rightOne;
+      for(let a in chosenAttrs) {
+        rightOne &&= (chosenAttrs[a].chosenItemId === e.chosenAttributes[a].chosenItemId);
+        if(!rightOne) return rightOne;
       }
-      if(identical) {
-        newCart = newCart.map(item => {
-          if(item.id === product.id)
-            return { ...item, quantity: item.quantity + 1};
-          return item;
-        });
-        this.setCart(newCart);
-        return;
-      }
+      return rightOne;
+    });
+    // If not found add the item to the cart
+    if(foundItemIndex === -1) {
+      let added = {
+        id: product.id,
+        brand: product.brand,
+        name: product.name,
+        prices: product.prices,
+        attributes: product.attributes,
+        chosenAttributes: chosenAttrs,
+        gallery: product.gallery,
+        quantity: 1
+      };
+      newCart.push(added);
+      this.setCart(newCart);
+    } else { // If found just add 1 to quantity of that item
+      newCart[foundItemIndex].quantity += 1;
+      this.setCart(newCart);
     }
-
-    // Adding to the cart if item(s) wasn't found
-    // or the attributes didn't match
-    newCart.push(added);
-    this.setCart(newCart);
   }
   render() {
     const { category, currency, loading, error } = this.state;

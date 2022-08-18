@@ -111,13 +111,11 @@ export default class ProductDisplay extends PureComponent {
       let rightOne = true && e.id === this.state.product.id;
       if(!rightOne) return rightOne;
       for(let a in this.state.chosenAttrs) {
-        console.log(this.state.chosenAttrs[a], e.chosenAttributes[a]);
         rightOne &&= (this.state.chosenAttrs[a].chosenItemId === e.chosenAttributes[a].chosenItemId);
         if(!rightOne) return rightOne;
       }
       return rightOne;
     });
-    console.log(newCart[foundItemIndex]);
     if(foundItemIndex === -1) {
       let newItem = {
         id: this.state.product.id,
@@ -131,11 +129,9 @@ export default class ProductDisplay extends PureComponent {
       };
       newCart.push(newItem);
       this.setCart(newCart);
-      console.log(newCart);
     } else {
       newCart[foundItemIndex].quantity += 1;
       this.setCart(newCart);
-      console.log(newCart);
     }
   }
   render() {
