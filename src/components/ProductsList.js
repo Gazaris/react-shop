@@ -164,7 +164,7 @@ export default class ProductsList extends PureComponent {
                   <span>{product.brand + " " +product.name}</span>
                   <span className='currency'>{price.currency.symbol + (price.amount || "0")}</span>
                 </div>
-                <CircleCartIcon onClick={(e) => this.handleAddToCartClick(e, product)} className={"circle-cart"}/>
+                <CircleCartIcon onClick={() => this.handleAddToCartClick(product)} className={"circle-cart"}/>
                 {!product.inStock && <span className="oos noselect">OUT OF STOCK</span>}
               </div>
             })}

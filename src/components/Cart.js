@@ -1,4 +1,5 @@
-import { PureComponent } from 'react'
+import { PureComponent } from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/Cart.css';
 import EmptyCart from '../svg/EmptyCart';
 
@@ -63,7 +64,7 @@ export default class Cart extends PureComponent {
     if(darkener.style.display === "none") {
       // Showing darkener and overlay
       darkener.style.display = "block";
-      overlay.style.display = "block";
+      overlay.style.display = "flex";
       setTimeout(() => {
         darkener.style.opacity = "1";
         overlay.style.transform = "translateY(10px)";
@@ -73,9 +74,9 @@ export default class Cart extends PureComponent {
       document.addEventListener("click", this.cartClickEvent);
     } else this.closeCartOverlay(darkener, overlay);
   }
-  increaseItemQuantity(item) {
+  findItemInCart(item) {
     let newCart = [...this.state.cart];
-    let findFunction = e => {
+    let foundItemIndex = newCart.findIndex(e => {
       let rightOne = true && e.id === item.id;
       if(!rightOne) return rightOne;
       for(let attr of item.chosenAttributes) {
@@ -83,18 +84,46 @@ export default class Cart extends PureComponent {
         if(!rightOne) return rightOne;
       }
       return rightOne;
-    };
-    let foundItemIndex = newCart.findIndex(findFunction);
+    });
+    return { newCart, foundItemIndex };
+  }
+  increaseItemQuantity(item) {
+    let { newCart, foundItemIndex } = this.findItemInCart(item);
     newCart[foundItemIndex].quantity += 1;
-    this.setCart(newCart);
+    // tempfix
+    this.closeCartOverlay(
+      document.getElementById("cart-darkener"),
+      document.getElementById("cart-overlay")
+    );
+    setTimeout(() => this.setCart(newCart), 300);
+  }
+  decreaseItemQuantity(item) {
+    let { newCart, foundItemIndex } = this.findItemInCart(item);
+    if(newCart[foundItemIndex].quantity === 1)
+      newCart.splice(foundItemIndex, 1);
+    else
+      newCart[foundItemIndex].quantity -= 1;
+    // tempfix
+    this.closeCartOverlay(
+      document.getElementById("cart-darkener"),
+      document.getElementById("cart-overlay")
+    );
+    setTimeout(() => this.setCart(newCart), 300);
   }
   render() {
     let { currency, cartCount, cart } = this.state;
+    let totalCost = 0;
     return (<div id="cart">
       <EmptyCart id="cart-icon" onClick={this.handleCartClick}/>
-      {cartCount !== 0 && <div id="cart-counter" className="noselect" onClick={this.handleCartClick}>{ cartCount }</div>}
+      {cartCount !== 0 && <div
+        id="cart-counter"
+        className="noselect"
+        onClick={this.handleCartClick}
+      >{ cartCount }</div>}
       <div id="cart-overlay" style={{display: "none", opacity: 0}}>
-        <span className="heading"><strong>My Bag</strong>, {cartCount} items</span>
+        <span className="heading">
+          <strong>My Bag</strong>, {cartCount} items
+        </span>
         {cartCount !== 0 && <div className="items">
           {cart.map(item => {
             let chosenPrice = {
@@ -108,11 +137,15 @@ export default class Cart extends PureComponent {
               if(price.currency.label === currency.label)
                 chosenPrice = price;
             }
+            totalCost += chosenPrice.amount * item.quantity;
+            totalCost = Math.floor(totalCost * 100) / 100;
             return <div key={item.id} className="cart-item">
               <div className="main-info">
                 <span>{item.brand}</span>
                 <span>{item.name}</span>
-                <strong>{chosenPrice.currency.symbol + chosenPrice.amount}</strong>
+                <strong>
+                  {chosenPrice.currency.symbol + chosenPrice.amount}
+                </strong>
                 {item.attributes.map(attr => {
                   // Since I can't directly reference an object
                   // with certain field value
@@ -132,7 +165,10 @@ export default class Cart extends PureComponent {
                       {attr.type === "swatch" && attr.items.map(item => {
                         return <div 
                           key={item.id}
-                          className={"c-item swatch" + (item.id === chosen.chosenItemId ? " chosen" : "")}
+                          className={
+                            "c-item swatch" + 
+                            (item.id === chosen.chosenItemId ? " chosen" : "")
+                          }
                         >
                           <div style={{ backgroundColor: item.value }}/>
                         </div>
@@ -140,7 +176,10 @@ export default class Cart extends PureComponent {
                       {attr.type === "text" && attr.items.map(item => {
                         return <div
                           key={item.id}
-                          className={"c-item text" + (item.id === chosen.chosenItemId ? " chosen" : "")}
+                          className={
+                            "c-item text" + 
+                            (item.id === chosen.chosenItemId ? " chosen" : "")
+                          }
                         >
                           <span className="noselect">{item.value}</span>
                         </div>
@@ -150,14 +189,29 @@ export default class Cart extends PureComponent {
                 })}
               </div>
               <div className="quantity">
-                <div className="cart-btn noselect" onClick={() => this.increaseItemQuantity(item)}>+</div>
+                <div
+                  className="cart-btn noselect" 
+                  onClick={() => this.increaseItemQuantity(item)}
+                >+</div>
                 <span>{item.quantity}</span>
-                <div className="cart-btn noselect">-</div>
+                <div
+                  className="cart-btn noselect"
+                  onClick={() => this.decreaseItemQuantity(item)}
+                >-</div>
               </div>
               <img className="preview" src={item.gallery[0]} alt={item.id} />
             </div>
           })}
         </div>}
+        {cartCount === 0 && <span className="empty">EMPTY</span>}
+        <div className="total-cost">
+          <strong>Total</strong>
+          <strong>{this.state.currency.symbol + totalCost}</strong>
+        </div>
+        <div className="btns">
+          <Link className="cart-btn noselect" to="/cart">VIEW BAG</Link>
+          <div className="cart-btn noselect">CHECK OUT</div>
+        </div>
       </div>
     </div>)
   }

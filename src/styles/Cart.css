@@ -29,23 +29,29 @@
     left: 13px;
 }
 #cart-overlay {
+    display: flex;
+    flex-direction: column;
     position: absolute;
     top: 35px;
     right: -30px;
     width: 325px;
     height: fit-content;
     max-height: 500px;
-    overflow: scroll;
-    scrollbar-width: none;
     transition: .3s ease-in-out;
     background-color: white;
     z-index: 1;
     padding: 32px 16px;
 }
-#cart-overlay .items {
+#cart-overlay > .empty {
+    margin: 20px 0;
+    text-align: center;
+}
+#cart-overlay > .items {
     display: flex;
     flex-direction: column;
     margin: 32px 0;
+    overflow: auto;
+    overflow-x: hidden;
 }
 .cart-item {
     display: flex;
@@ -56,11 +62,15 @@
 .cart-item:first-child {
     margin-top: 0;
 }
-.cart-item .main-info {
+.cart-item > .main-info {
     display: flex;
     flex-direction: column;
-    width: 136px;
+    min-width: 136px;
     height: fit-content;
+}
+.cart-item > .main-info > span,
+.cart-item > .main-info > strong {
+    margin-bottom: 10px;
 }
 .cart-item .quantity {
     display: flex;
@@ -83,14 +93,20 @@
     background-color: black;
     color: white;
 }
-.cart-item .preview {
-    height: 100%;
+.cart-item > .preview {
     width: 120px;
     object-fit: contain;
+}
+.c-attr {
+    margin: 8px 0;
+}
+.c-attr:last-child {
+    margin-bottom: 0;
 }
 .c-items {
     display: flex;
     flex-direction: row;
+    margin-top: 8px;
 }
 .c-items .c-item{
     display: flex;
@@ -101,7 +117,7 @@
 }
 .c-items .c-item:first-child {
     margin-left: 0;
-}
+}   
 .c-items .c-item.text {
     min-width: 24px;
     min-height: 24px;
@@ -112,4 +128,29 @@
     height: 20px;
     border-color: white;
     background-color: #ededed;
+}
+
+#cart-overlay > .total-cost {
+    display: flex;
+    justify-content: space-between;
+}
+
+#cart-overlay > .btns {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 32px;
+}
+#cart-overlay > .btns .cart-btn {
+    width: 140px;
+    height: 43px;
+    text-decoration: none;
+    color: black;
+}
+#cart-overlay > .btns .cart-btn:hover {
+    color: white;
+}
+#cart-overlay > .btns .cart-btn:nth-child(2) {
+    background-color: #5ECE7B;
+    border-color: #5ECE7B;
+    color: white;
 }
