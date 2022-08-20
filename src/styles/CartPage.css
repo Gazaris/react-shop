@@ -1,0 +1,126 @@
+#cart-page .empty {
+    margin: 20px 0;
+    text-align: center;
+    font-size: 25px;
+    font-weight: 700;
+}
+#cart-page h1:first-child{
+    font-size: 32px;
+    font-weight: 700;
+    font-family: "Raleway", sans-serif;
+}
+
+#cart-page .items  {
+    display: flex;
+    flex-direction: column;
+    margin: 32px 0;
+    border-bottom: solid 1px #E5E5E5;
+}
+#cart-page .items .cart-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-top: solid 1px #E5E5E5;
+    padding: 24px 0px;
+    margin: 0;
+}
+.cart-item .main {
+    display: flex;
+    flex-direction: column;
+}
+.cart-item .main .brand,
+.cart-item .main > .name {
+    font-size: 30px;
+}
+.cart-item .main .brand {
+    font-weight: 600;
+}
+.cart-item .main > .name {
+    font-weight: 400;
+    margin-top: 16px;
+}
+.cart-item .main .cp-price {
+    margin-top: 20px;
+    font-size: 24px;
+}
+.cart-item .main .attrs {
+    margin-top: 4px;
+    margin-bottom: 6px;
+}
+.cp-attr {
+    margin-top: 16px;
+}
+.cp-attr .name {
+    font-family: "Roboto Condensed", sans-serif;
+    font-size: 18px;
+}
+.cp-items {
+    display: flex;
+    margin-top: 5px;
+}
+.cp-item {
+    margin-left: 5px;
+    border: solid 1px #1D1F22;
+}
+.cp-item:first-child {
+    margin-left: 0;
+}
+.cp-item.text {
+    font-family: "Source Sans Pro", sans-serif;
+    font-weight: 400;
+    font-size: 15px;
+    padding: 12px 22px;
+}
+.cp-items .swatch {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    border-color: white;
+    background-color: #ededed;
+}
+.cp-items .swatch > div {
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+}
+.cp-items .swatch.chosen {
+    border-color: #5ECE7B;
+}
+
+.cart-item .secondary {
+    display: flex;
+}
+.cart-item .secondary .preview img {
+    width: 200px;
+    object-fit: contain;
+}
+
+.total-box {
+    width: 280px;
+}
+.total-box .info {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 8px;
+}
+.total-box .headings {
+    display: flex;
+    flex-direction: column;
+}
+.total-box .values {
+    display: flex;
+    flex-direction: column;
+    margin-left: 5px;
+}
+.total-box .headings > *,
+.total-box .values > * {
+    margin-bottom: 8px;
+}
+.total-box .cart-btn {
+    background-color: #5ECE7B;
+    border-color: #5ECE7B;
+    color: white;
+    cursor: not-allowed;
+    padding: 13px;
+}

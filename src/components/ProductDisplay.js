@@ -12,7 +12,7 @@ export default class ProductDisplay extends PureComponent {
       error: false,
       chosenAttrs: [],
       cart: this.props.cart
-    }
+    };
     this.setCart = this.props.setcart.bind(this);
     this.getProduct = this.getProduct.bind(this);
     this.addToCart = this.addToCart.bind(this);

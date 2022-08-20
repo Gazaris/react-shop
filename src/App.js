@@ -5,6 +5,7 @@ import ProductsList from './components/ProductsList';
 import Header from './components/Header';
 import NotFound from './components/NotFound';
 import ProductDisplay from './components/ProductDisplay';
+import CartPage from './components/CartPage';
 import { Query, client } from '@tilework/opus';
 
 export default class App extends PureComponent {
@@ -96,6 +97,14 @@ export default class App extends PureComponent {
         <Switch>
           <Route path="/404">
             <NotFound />
+          </Route>
+          <Route path="/cart">
+            <CartPage
+              key={Math.random()}
+              cart={this.state.cart}
+              setcart={this.setCart}
+              currency={this.state.currency}
+            />
           </Route>
           <Route
             path="/item/:id"
