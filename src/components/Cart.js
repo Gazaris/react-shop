@@ -32,10 +32,9 @@ export default class Cart extends PureComponent {
   }
   cartClickEvent(e) {
     let darkener = document.getElementById("cart-darkener");
-    let overlay = document.getElementById("cart-overlay");
     if(darkener.style.display === "block") {
       if(!this.isOverlay(e.target) && !this.isSwitch(e.target))
-        this.closeCartOverlay(darkener, overlay);
+        this.closeCartOverlay();
     }
   }
   isSwitch(el) {
@@ -48,7 +47,9 @@ export default class Cart extends PureComponent {
     else if(el.tagName === "BODY") return false;
     else return this.isOverlay(el.parentElement);
   }
-  closeCartOverlay(darkener, overlay) {
+  closeCartOverlay() {
+    let darkener = document.getElementById("cart-darkener");
+    let overlay = document.getElementById("cart-overlay");
     darkener.style.opacity = "0";
     overlay.style.transform = "translateY(0)";
     overlay.style.opacity = "0";
@@ -72,7 +73,7 @@ export default class Cart extends PureComponent {
       }, 100);
 
       document.addEventListener("click", this.cartClickEvent);
-    } else this.closeCartOverlay(darkener, overlay);
+    } else this.closeCartOverlay();
   }
   findItemInCart(item) {
     let newCart = [...this.state.cart];
@@ -91,10 +92,7 @@ export default class Cart extends PureComponent {
     let { newCart, foundItemIndex } = this.findItemInCart(item);
     newCart[foundItemIndex].quantity += 1;
     // tempfix
-    this.closeCartOverlay(
-      document.getElementById("cart-darkener"),
-      document.getElementById("cart-overlay")
-    );
+    this.closeCartOverlay();
     setTimeout(() => this.setCart(newCart), 300);
   }
   decreaseItemQuantity(item) {
@@ -104,10 +102,7 @@ export default class Cart extends PureComponent {
     else
       newCart[foundItemIndex].quantity -= 1;
     // tempfix
-    this.closeCartOverlay(
-      document.getElementById("cart-darkener"),
-      document.getElementById("cart-overlay")
-    );
+    this.closeCartOverlay();
     setTimeout(() => this.setCart(newCart), 300);
   }
   render() {
@@ -210,7 +205,11 @@ export default class Cart extends PureComponent {
           <strong>{this.state.currency.symbol + totalCost}</strong>
         </div>
         <div className="btns">
-          <Link className="cart-btn noselect" to="/cart">VIEW BAG</Link>
+          <Link
+            className="cart-btn noselect"
+            to="/cart"
+            onClick={() => this.closeCartOverlay()}
+          >VIEW BAG</Link>
           <div className="cart-btn noselect">CHECK OUT</div>
         </div>
       </div>

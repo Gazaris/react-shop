@@ -91,9 +91,34 @@
 .cart-item .secondary {
     display: flex;
 }
+.cart-item .secondary .preview {
+    position: relative;
+}
 .cart-item .secondary .preview img {
     width: 200px;
+    height: auto;
     object-fit: contain;
+    transition: .2s ease-in-out;
+}
+.cart-item .secondary .gallery-scroll {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+}
+.gallery-scroll > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 24px;
+    height: 24px;
+    background-color: #000000ba;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: .1s ease-in-out;
+}
+.gallery-scroll > div:hover {
+    background-color: #2f2f2fba;
 }
 
 .total-box {
