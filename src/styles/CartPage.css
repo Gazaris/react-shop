@@ -106,6 +106,9 @@
     bottom: 16px;
     display: flex;
 }
+.cart-item .secondary .prev svg:first-child {
+    transform: scaleX(-1);
+}
 .gallery-scroll > div {
     display: flex;
     justify-content: center;

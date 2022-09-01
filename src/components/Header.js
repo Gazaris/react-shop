@@ -1,4 +1,4 @@
-import { PureComponent } from 'react';
+import { PureComponent, createRef } from 'react';
 import { Link } from 'react-router-dom';
 import Cart from './Cart';
 import "../styles/Header.css";
@@ -9,23 +9,27 @@ export default class Header extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      cart: this.props.cart,
-      setcart: this.props.setcart,
       categories: this.props.categories,
       category: window.location.pathname.split('/')[1],
       currencies: this.props.currencies,
-      currency: this.props.currency,
-      setcur: this.props.setcur
+      currency: this.props.currency
     };
+    this.curMenuRef = createRef();
+    this.curDropRef = createRef();
+
+    this.setcur = this.props.setcur.bind(this);
+    this.addToCart = this.props.addtocart.bind(this);
+    this.subtrFromCart = this.props.subtrfromcart.bind(this);
     this.clickEventFunc = this.clickEventFunc.bind(this);
     this.isMenu = this.isMenu.bind(this);
     this.closeCurMenu = this.closeCurMenu.bind(this);
     this.curSwitch = this.curSwitch.bind(this);
+    this.curClickHandle = this.curClickHandle.bind(this);
     // Fix for redirect from main page
     if(this.state.category === "") this.state.category = "all";
   }
   clickEventFunc(e) {
-    let menu = document.getElementById("curmenu");
+    let menu = this.curMenuRef.current;
     if(menu.style.display === "block") {
       if(!this.isMenu(e.target) && e.target.id !== "currency-switch")
         this.closeCurMenu(menu);
@@ -37,19 +41,24 @@ export default class Header extends PureComponent {
     else return this.isMenu(el.parentElement);
   }
   closeCurMenu(menu) {
-    document.getElementById("drop").style.transform = "scaleY(1)";
+    this.curDropRef.current.style !== undefined
+      ? this.curDropRef.current.style.transform = "scaleY(1)"
+      : this.curDropRef.current.style = { transform: "scaleY(1)" };
     menu.style.transform = "translateY(0)";
     menu.style.opacity = "0";
     setTimeout(() => {
       menu.style.display = "none";
     }, 300);
-    document.removeEventListener("click", this.clickEventFunc);
+    this.props.appRef.current.removeEventListener("click", this.clickEventFunc);
   }
   curSwitch() {
-    let menu = document.getElementById("curmenu");
-    if(menu.style.display === "none") {
+    let menu = this.curMenuRef.current;
+    if(!menu.style.display || menu.style.display === "none") {
       // Controlling the dropdown icon
-      document.getElementById("drop").style.transform = "scaleY(-1)";
+      if(!this.curDropRef.current.style)
+        this.curDropRef.current.style = {transform: "scaleY(-1)"};
+      else
+        this.curDropRef.current.style.transform = "scaleY(-1)";
 
       // Controlling the menu
       menu.style.display = "block";
@@ -58,11 +67,20 @@ export default class Header extends PureComponent {
         menu.style.opacity = "1";
       }, 100);
 
-      document.addEventListener("click", this.clickEventFunc);
+      this.props.appRef.current.addEventListener("click", this.clickEventFunc);
     } else this.closeCurMenu(menu);
   }
+  curClickHandle(curLabel, curSymbol) {
+    if(this.state.currency.label === curLabel)
+      this.closeCurMenu(this.curMenuRef.current);
+    else {
+      this.props.appRef.current
+        .removeEventListener("click", this.clickEventFunc);
+      this.setcur({label: curLabel, symbol: curSymbol});
+    }
+  }
   render() {
-    let { categories, category, currencies, setcur } = this.state;
+    let { categories, category, currencies } = this.state;
     return (
       <header >
         <div id="navigation">
@@ -81,22 +99,26 @@ export default class Header extends PureComponent {
         <div id="actions">
           <div id="currency-switch" onClick={this.curSwitch}>
             <span className="noselect">{this.props.currency.symbol}</span>
-            <Drop id="drop"/>
+            <Drop id="drop" ref={this.curDropRef}/>
           </div>
-          <div id="curmenu" style={{display: "none", opacity: 0}}>
+          <div id="curmenu" ref={this.curMenuRef} >
             {currencies.map((cur) => {
               return <div
                 className="curopt noselect"
-                onClick={() => setcur({label: cur.label, symbol: cur.symbol})}
+                onClick={() => this.curClickHandle(cur.label, cur.symbol)}
                 key={cur.label}
               >{cur.symbol + " " + cur.label}</div>
             })}
           </div>
           <Cart
             key={Math.random()}
+            ref={this.props.cartRef}
+            darkenerRef={this.props.darkenerRef}
+            appRef={this.props.appRef}
+            counterRef={this.props.counterRef}
             currency={this.state.currency}
-            cart={this.state.cart}
-            setcart={this.state.setcart}
+            addtocart={this.addToCart}
+            subtrfromcart={this.subtrFromCart}
           />
         </div>
       </header>

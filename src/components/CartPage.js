@@ -6,36 +6,11 @@ export default class CartPage extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      cart: this.props.cart,
+      cart: JSON.parse(localStorage.getItem("cart")) || [],
       currency: this.props.currency
     };
-    this.setCart = this.props.setcart.bind(this);
-  }
-  findItemInCart(item) {
-    let newCart = [...this.state.cart];
-    let foundItemIndex = newCart.findIndex(e => {
-      let rightOne = true && e.id === item.id;
-      if(!rightOne) return rightOne;
-      for(let attr of item.chosenAttributes) {
-        rightOne &&= attr;
-        if(!rightOne) return rightOne;
-      }
-      return rightOne;
-    });
-    return { newCart, foundItemIndex };
-  }
-  increaseItemQuantity(item) {
-    let { newCart, foundItemIndex } = this.findItemInCart(item);
-    newCart[foundItemIndex].quantity += 1;
-    this.setCart(newCart);
-  }
-  decreaseItemQuantity(item) {
-    let { newCart, foundItemIndex } = this.findItemInCart(item);
-    if(newCart[foundItemIndex].quantity === 1)
-      newCart.splice(foundItemIndex, 1);
-    else
-      newCart[foundItemIndex].quantity -= 1;
-    this.setCart(newCart);
+    this.increaseItemQuantity = this.props.addtocart.bind(this);
+    this.decreaseItemQuantity = this.props.subtrfromcart.bind(this);
   }
   getImg(el) {
     while(!el.classList.contains("preview")) {
@@ -93,9 +68,10 @@ export default class CartPage extends PureComponent {
         {cart.map(item => {
           // Getting the right price of item
           for(let p of item.prices) {
-            if(p.currency.label === currency.label)
+            if(p.currency.label === currency.label) {
               chosenPrice = p;
               break;
+            }
           }
           totalCost += chosenPrice.amount * item.quantity;
           totalCost = Math.floor(totalCost * 100) / 100;
@@ -158,19 +134,25 @@ export default class CartPage extends PureComponent {
               <div className="quantity">
                 <div
                   className="cart-btn noselect" 
-                  onClick={() => this.increaseItemQuantity(item)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    this.increaseItemQuantity(item);
+                  }}
                 >+</div>
                 <span>{item.quantity}</span>
                 <div
                   className="cart-btn noselect"
-                  onClick={() => this.decreaseItemQuantity(item)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    this.decreaseItemQuantity(item);
+                  }}
                 >-</div>
               </div>
               <div className="preview">
                 <img className="noselect" src={item.gallery[0]} alt={item.id} />
                 {item.gallery.length > 1 && <div className="gallery-scroll">
                   <div className="prev" onClick={(e) => this.prevPreview(e, item)}>
-                    <ArrowWhite style={{transform: "scaleX(-1)"}}/>
+                    <ArrowWhite />
                   </div>
                   <div className="next" onClick={(e) => this.nextPreview(e, item)}>
                     <ArrowWhite />

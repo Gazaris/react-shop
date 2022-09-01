@@ -1,12 +1,13 @@
 import './App.css';
-import { PureComponent } from 'react';
+import { PureComponent, createRef } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import ProductsList from './components/ProductsList';
 import Header from './components/Header';
 import NotFound from './components/NotFound';
 import ProductDisplay from './components/ProductDisplay';
 import CartPage from './components/CartPage';
-import { Query, client } from '@tilework/opus';
+import { client } from '@tilework/opus';
+import { getCategoriesQuery, getCurrenciesQuery } from './Queries';
 
 export default class App extends PureComponent {
   constructor(props) {
@@ -18,15 +19,21 @@ export default class App extends PureComponent {
       },
       currencies: [],
       categories: [],
-      cart: JSON.parse(localStorage.getItem("cart")),
       error: false
     }
-    if(this.state.cart === null) {
-      this.state.cart = [];
-      localStorage.setItem("cart", JSON.stringify([]));
-    }
-    client.setEndpoint(process.env.REACT_APP_GRAPHQL_ENDPOINT);
+    this.appRef = createRef();
+    this.cartCounterRef = createRef();
+    this.cartRef = createRef();
+    this.cartPageRef = createRef();
+    this.darkenerRef = createRef();
+
+    client.setEndpoint("http://localhost:4000/");
+
+    this.findInCart = this.findInCart.bind(this);
+    this.addToCart = this.addToCart.bind(this);
+    this.subtrFromCart = this.subtrFromCart.bind(this);
     this.setCart = this.setCart.bind(this);
+
     this.getCurs = this.getCurs.bind(this);
     this.setCurrency = this.setCurrency.bind(this);
   }
@@ -36,14 +43,58 @@ export default class App extends PureComponent {
       this.getCurs();
   }
   setCart(cartset) {
-    this.setState({ cart: cartset });
     localStorage.setItem("cart", JSON.stringify(cartset));
+    let newCartCount = 0;
+    if(cartset.length !== 0) {
+      for(let item of cartset)
+        newCartCount += item.quantity;
+    }
+    if(this.cartPageRef.current)
+      this.cartPageRef.current.setState({ cart: cartset });
+    if(this.cartCounterRef.current)
+      this.cartCounterRef.current.setCount(newCartCount);
+    if(this.cartRef.current)
+      this.cartRef.current.setState({ cartCount: newCartCount, cart: cartset })
+  }
+  findInCart(item, cart) {
+    // Searching for the identical item in cart
+    return cart.findIndex(e => {
+      let rightOne = true && e.id === item.id;
+      if(!rightOne) return rightOne;
+      for(let a in item.chosenAttributes) {
+        rightOne &&= (item.chosenAttributes[a].chosenItemId === e.chosenAttributes[a].chosenItemId);
+        if(!rightOne) return rightOne;
+      }
+      return rightOne;
+    });
+  }
+  // Must pass item with all chosen attributes
+  // and quantity of 1
+  addToCart(item) {
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let newCart = [ ...cart ];
+    const found = this.findInCart(item, cart);
+    found === -1
+      ? newCart.push(item)
+      : newCart[found].quantity += 1
+    return this.setCart(newCart);
+  }
+  // Must pass item that already exists in the cart
+  subtrFromCart(item) {
+    const cart = JSON.parse(localStorage.getItem("cart"));
+    let newCart = [ ...cart ];
+    const found = this.findInCart(item, cart);
+    item.quantity === 1
+      ? newCart.splice(found, 1)
+      : newCart[found].quantity -= 1;
+    if(newCart.length === 0) {
+      this.cartRef.current.setState({ cartCount: 0 });
+      return this.setCart([]);
+    }
+    return this.setCart(newCart);
   }
   async getCtgrs() {
-    const res = await client.post(
-      new Query('categories', true)
-        .addField('name')
-    );
+    const res = await client.post(getCategoriesQuery());
     if(res.categories !== []) {
       let resCat = [];
       for(let cat of res.categories) {
@@ -56,11 +107,7 @@ export default class App extends PureComponent {
     }
   }
   async getCurs() {
-    const res = await client.post(
-      new Query('currencies', true)
-        .addField('label')
-        .addField('symbol')
-    );
+    const res = await client.post(getCurrenciesQuery());
     if(res.currencies !== []) {
       this.setState({ currencies: res.currencies});
       if(this.state.currency.symbol === "-") {
@@ -82,13 +129,21 @@ export default class App extends PureComponent {
     localStorage.setItem("currency", JSON.stringify(cur));
   }
   render() {
+    if(this.state.currency.label === "" ||
+      this.state.currencies.length === 0 ||
+      this.state.categories.length === 0)
+      return <div />;
     return (
-      <div id="App">
+      <div id="App" ref={this.appRef} >
         <Header
           // Key for updating the component after props change
           key={Math.random()}
-          cart={this.state.cart}
-          setcart={this.setCart}
+          appRef={this.appRef}
+          counterRef={this.cartCounterRef}
+          cartRef={this.cartRef}
+          darkenerRef={this.darkenerRef}
+          addtocart={this.addToCart}
+          subtrfromcart={this.subtrFromCart}
           categories={this.state.categories}
           currencies={this.state.currencies}
           currency={this.state.currency}
@@ -101,8 +156,9 @@ export default class App extends PureComponent {
           <Route path="/cart">
             <CartPage
               key={Math.random()}
-              cart={this.state.cart}
-              setcart={this.setCart}
+              ref={this.cartPageRef}
+              addtocart={this.addToCart}
+              subtrfromcart={this.subtrFromCart}
               currency={this.state.currency}
             />
           </Route>
@@ -111,8 +167,7 @@ export default class App extends PureComponent {
             component={
               (props) => <ProductDisplay
                 currency={this.state.currency}
-                cart={this.state.cart}
-                setcart={this.setCart}
+                addtocart={this.addToCart}
                 {...props}
                 key={window.location.pathname} />
             }
@@ -123,8 +178,7 @@ export default class App extends PureComponent {
               (props) => <ProductsList
                 currency={this.state.currency}
                 error={this.state.error}
-                cart={this.state.cart}
-                setcart={this.setCart}
+                addtocart={this.addToCart}
                 {...props}
                 key={window.location.pathname} />
             }
@@ -133,7 +187,7 @@ export default class App extends PureComponent {
             <Redirect to="/all" />
           </Route>
         </Switch>
-        <div id="cart-darkener" style={{display: "none", opacity: 0}} />
+        <div id="cart-darkener" ref={this.darkenerRef} />
       </div>
     );
   }

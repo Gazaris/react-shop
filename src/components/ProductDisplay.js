@@ -1,5 +1,6 @@
-import { client, Query, Field } from '@tilework/opus';
-import { PureComponent } from 'react';
+import { createRef, PureComponent } from 'react';
+import { client } from '@tilework/opus';
+import { getProductQuery } from '../Queries';
 import '../styles/ProductDisplay.css';
 
 export default class ProductDisplay extends PureComponent {
@@ -10,12 +11,13 @@ export default class ProductDisplay extends PureComponent {
       currency: this.props.currency,
       loading: true,
       error: false,
-      chosenAttrs: [],
-      cart: this.props.cart
+      chosenAttrs: []
     };
-    this.setCart = this.props.setcart.bind(this);
+    this.previewRef = createRef();
+    this.galleryRef = createRef();
+    this.addToCart = this.props.addtocart.bind(this);
     this.getProduct = this.getProduct.bind(this);
-    this.addToCart = this.addToCart.bind(this);
+    this.addItem = this.addItem.bind(this);
     this.handleAttr = this.handleAttr.bind(this);
     this.handleSmallPreview = this.handleSmallPreview.bind(this);
   }
@@ -28,31 +30,7 @@ export default class ProductDisplay extends PureComponent {
   }
   async getProduct() {
     const res = await client.post(
-      new Query('product', false)
-      .addArgument('id', 'String!', this.state.product)
-      .addField('id')
-      .addField('gallery')
-      .addField('brand')
-      .addField('name')
-      .addField(new Field('attributes', true)
-        .addField('id')
-        .addField('name')
-        .addField('type')
-        .addField(new Field('items')
-          .addField('displayValue')
-          .addField('value')
-          .addField('id')
-        )
-      )
-      .addField(new Field('prices', false)
-        .addField(new Field('currency')
-          .addField('label')
-          .addField('symbol')
-        )
-        .addField('amount')
-      )
-      .addField('inStock')
-      .addField('description')
+      getProductQuery(this.state.product)
     );
     if(res.product !== null){
       let defaultAttrs = [];
@@ -70,7 +48,7 @@ export default class ProductDisplay extends PureComponent {
       });
     }
     else {
-      window.history.replaceState( {} , '', '/404' );
+      window.history.replaceState({}, '', '/404');
       window.location.reload();
     }
   }
@@ -93,46 +71,29 @@ export default class ProductDisplay extends PureComponent {
     this.setState({ chosenAttrs: newChosenAttrs });
   }
   handleSmallPreview(e) {
-    document
-      .getElementById("small-preview")
+    this.galleryRef.current
       .getElementsByClassName("chosen")[0]
       .classList.remove("chosen");
     e.target.classList.add("chosen");
-    let big = document.getElementById("big-preview");
+    let big = this.previewRef.current;
     big.style.opacity = "0";
     setTimeout(() => {
       big.src = e.target.src;
       big.style.opacity = "1";
     }, 200);
   }
-  addToCart() {
-    let newCart = [...this.state.cart];
-    let foundItemIndex = newCart.findIndex(e => {
-      let rightOne = true && e.id === this.state.product.id;
-      if(!rightOne) return rightOne;
-      for(let a in this.state.chosenAttrs) {
-        rightOne &&= (this.state.chosenAttrs[a].chosenItemId === e.chosenAttributes[a].chosenItemId);
-        if(!rightOne) return rightOne;
-      }
-      return rightOne;
-    });
-    if(foundItemIndex === -1) {
-      let newItem = {
-        id: this.state.product.id,
-        brand: this.state.product.brand,
-        name: this.state.product.name,
-        prices: this.state.product.prices,
-        attributes: this.state.product.attributes,
-        chosenAttributes: this.state.chosenAttrs,
-        gallery: this.state.product.gallery,
-        quantity: 1
-      };
-      newCart.push(newItem);
-      this.setCart(newCart);
-    } else {
-      newCart[foundItemIndex].quantity += 1;
-      this.setCart(newCart);
-    }
+  addItem() {
+    let newItem = {
+      id: this.state.product.id,
+      brand: this.state.product.brand,
+      name: this.state.product.name,
+      prices: this.state.product.prices,
+      attributes: this.state.product.attributes,
+      chosenAttributes: this.state.chosenAttrs,
+      gallery: this.state.product.gallery,
+      quantity: 1
+    };
+    this.addToCart(newItem);
   }
   render() {
     let { product, currency, loading, error } = this.state;
@@ -157,7 +118,7 @@ export default class ProductDisplay extends PureComponent {
       {error && <h1 className="content item-content">Something went wrong...</h1>}
       {(!error && loading) && <h1 className="content item-content">Loading...</h1>}
       {((!error && !loading) && product) && <div className="content item-content">
-        <div id="small-preview">
+        <div id="small-preview" ref={this.galleryRef}>
           {product.gallery.map((pic) => {
             if(c === 0) cl = "chosen";
             else cl = "";
@@ -170,7 +131,7 @@ export default class ProductDisplay extends PureComponent {
             />
           })}
         </div>
-        <img id="big-preview" src={product.gallery[0]} alt={product.id} />
+        <img id="big-preview" ref={this.previewRef} src={product.gallery[0]} alt={product.id} />
         <div id="main-info">
           <h1 className="brand">{product.brand}</h1>
           <h1 className="name">{product.name}</h1>
@@ -215,7 +176,7 @@ export default class ProductDisplay extends PureComponent {
           {product.inStock && 
             <div
               className="add-to-cart noselect"
-              onClick={this.addToCart}
+              onClick={this.addItem}
             >
               ADD TO CART
             </div>

@@ -5,6 +5,9 @@
 #small-preview {
     display: flex;
     flex-direction: column;
+    width: 125px;
+    max-height: 320px;
+    overflow-y: scroll;
 }
 #small-preview img {
     object-fit: contain;
@@ -14,6 +17,9 @@
     border: solid 1px white;
     transition: .1s ease-in-out;
     cursor: pointer;
+}
+#small-preview img:last-child {
+    margin-bottom: 0;
 }
 #small-preview img:hover, #small-preview img.chosen{
     border-color: black;

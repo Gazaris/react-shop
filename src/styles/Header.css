@@ -72,6 +72,8 @@ header {
   z-index: 2;
   font-size: 18px;
   font-weight: 500;
+  display: none;
+  opacity: 0;
 }
 #curmenu .curopt {
   padding: 8px 20px;

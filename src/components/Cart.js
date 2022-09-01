@@ -1,37 +1,36 @@
-import { PureComponent } from 'react';
+import { createRef, PureComponent } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/Cart.css';
 import EmptyCart from '../svg/EmptyCart';
+import CartCounter from './CartCounter';
 
 export default class Cart extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       currency: this.props.currency,
-      cart: this.props.cart,
+      cart: JSON.parse(localStorage.getItem("cart")) || [],
       cartCount: 0
     };
-    this.setCart = this.props.setcart.bind(this);
-    this.getCartCount = this.getCartCount.bind(this);
+    this.overlayRef = createRef();
+    this.increaseItemQuantity = this.props.addtocart.bind(this);
+    this.decreaseItemQuantity = this.props.subtrfromcart.bind(this);
     this.cartClickEvent = this.cartClickEvent.bind(this);
     this.isOverlay = this.isOverlay.bind(this);
     this.closeCartOverlay = this.closeCartOverlay.bind(this);
     this.handleCartClick = this.handleCartClick.bind(this);
   }
   componentDidMount() {
-    this.getCartCount();
-  }
-  getCartCount() {
+    // Setting initial cart count
     if(this.state.cart.length !== 0) {
       let total = 0;
-      for(let item of this.state.cart) {
+      for(let item of this.state.cart)
         total += item.quantity;
-      }
       this.setState({ cartCount: total });
     }
   }
   cartClickEvent(e) {
-    let darkener = document.getElementById("cart-darkener");
+    let darkener = this.props.darkenerRef.current;
     if(darkener.style.display === "block") {
       if(!this.isOverlay(e.target) && !this.isSwitch(e.target))
         this.closeCartOverlay();
@@ -48,21 +47,21 @@ export default class Cart extends PureComponent {
     else return this.isOverlay(el.parentElement);
   }
   closeCartOverlay() {
-    let darkener = document.getElementById("cart-darkener");
-    let overlay = document.getElementById("cart-overlay");
+    let darkener = this.props.darkenerRef.current;
+    let overlay = this.overlayRef.current;
     darkener.style.opacity = "0";
     overlay.style.transform = "translateY(0)";
     overlay.style.opacity = "0";
     setTimeout(() => {
-      darkener.style.display = "none";
-      overlay.style.display = "none";
+      darkener.style = {};
+      overlay.style = {};
     }, 300);
-    document.removeEventListener("click", this.cartClickEvent);
+    this.props.appRef.current.removeEventListener("click", this.cartClickEvent);
   }
   handleCartClick() {
-    let darkener = document.getElementById("cart-darkener");
-    let overlay = document.getElementById("cart-overlay");
-    if(darkener.style.display === "none") {
+    let darkener = this.props.darkenerRef.current;
+    let overlay = this.overlayRef.current;
+    if(!darkener.style.display || darkener.style.display === "none") {
       // Showing darkener and overlay
       darkener.style.display = "block";
       overlay.style.display = "flex";
@@ -72,38 +71,8 @@ export default class Cart extends PureComponent {
         overlay.style.opacity = "1";
       }, 100);
 
-      document.addEventListener("click", this.cartClickEvent);
+      this.props.appRef.current.addEventListener("click", this.cartClickEvent);
     } else this.closeCartOverlay();
-  }
-  findItemInCart(item) {
-    let newCart = [...this.state.cart];
-    let foundItemIndex = newCart.findIndex(e => {
-      let rightOne = true && e.id === item.id;
-      if(!rightOne) return rightOne;
-      for(let attr of item.chosenAttributes) {
-        rightOne &&= attr;
-        if(!rightOne) return rightOne;
-      }
-      return rightOne;
-    });
-    return { newCart, foundItemIndex };
-  }
-  increaseItemQuantity(item) {
-    let { newCart, foundItemIndex } = this.findItemInCart(item);
-    newCart[foundItemIndex].quantity += 1;
-    // tempfix
-    this.closeCartOverlay();
-    setTimeout(() => this.setCart(newCart), 300);
-  }
-  decreaseItemQuantity(item) {
-    let { newCart, foundItemIndex } = this.findItemInCart(item);
-    if(newCart[foundItemIndex].quantity === 1)
-      newCart.splice(foundItemIndex, 1);
-    else
-      newCart[foundItemIndex].quantity -= 1;
-    // tempfix
-    this.closeCartOverlay();
-    setTimeout(() => this.setCart(newCart), 300);
   }
   render() {
     let { currency, cartCount, cart } = this.state;
@@ -111,12 +80,12 @@ export default class Cart extends PureComponent {
     let ic = -1;
     return (<div id="cart">
       <EmptyCart id="cart-icon" onClick={this.handleCartClick}/>
-      {cartCount !== 0 && <div
-        id="cart-counter"
-        className="noselect"
-        onClick={this.handleCartClick}
-      >{ cartCount }</div>}
-      <div id="cart-overlay" style={{display: "none", opacity: 0}}>
+      {cartCount !== 0 && <CartCounter
+        ref={this.props.counterRef}
+        handleCartClick={this.handleCartClick}
+        cartCount={cartCount}
+      />}
+      <div id="cart-overlay" ref={this.overlayRef}>
         <span className="heading">
           <strong>My Bag</strong>, {cartCount} items
         </span>
@@ -187,12 +156,18 @@ export default class Cart extends PureComponent {
               <div className="quantity">
                 <div
                   className="cart-btn noselect" 
-                  onClick={() => this.increaseItemQuantity(item)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    this.increaseItemQuantity(item);
+                  }}
                 >+</div>
                 <span>{item.quantity}</span>
                 <div
                   className="cart-btn noselect"
-                  onClick={() => this.decreaseItemQuantity(item)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    this.decreaseItemQuantity(item);
+                  }}
                 >-</div>
               </div>
               <img className="preview" src={item.gallery[0]} alt={item.id} />
